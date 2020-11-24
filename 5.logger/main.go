@@ -43,12 +43,13 @@ func main() {
 	}()
 
 	//create a middleware to print each http request
-	mwLogger := fmx.LoggerWithFunc(true, true, func(c *fmx.Context, szLog []byte) {
-		fmt.Println("LOG:", szLog)
-	})
+	// mwLogger := fmx.LoggerWithFunc(true, true, func(c *fmx.Context, szLog []byte) {
+	// 	fmt.Println("LOG:", string(szLog))
+	// })
 
 	router := fmx.NewServeMux()
-	router.Use(mwLogger)
+	//router.Use(mwLogger)
+	router.Use(fmx.Logger(false, false))
 
 	router.GET("/api/profile", APIGetProfile)
 	router.POST("/api/profile", APIPostProfile)

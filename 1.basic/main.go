@@ -43,3 +43,53 @@ func main() {
 		fmt.Println(err)
 	}
 }
+
+func splitURLpath(path string) (parts []string, names map[string]int) {
+
+	var (
+		nameidx      int = -1
+		partidx      int
+		paramCounter int
+	)
+
+	for i := 0; i < len(path); i++ {
+		// recording name
+		if nameidx != -1 {
+			//found /
+			if path[i] == '/' {
+
+				if names == nil {
+					names = make(map[string]int)
+				}
+
+				names[path[nameidx:i]] = paramCounter
+				paramCounter++
+
+				nameidx = -1 // switch to normal recording
+				partidx = i
+			}
+		} else {
+			if path[i] == ':' || path[i] == '*' {
+				if path[i-1] != '/' {
+					panic(fmt.Errorf("Inválid parameter : or * comes anwais after / - %q", path))
+				}
+				nameidx = i + 1
+				if partidx != i {
+					parts = append(parts, path[partidx:i])
+				}
+				parts = append(parts, path[i:nameidx])
+			}
+		}
+	}
+
+	if nameidx != -1 {
+		if names == nil {
+			names = make(map[string]int)
+		}
+		names[path[nameidx:]] = paramCounter
+		paramCounter++
+	} else if partidx < len(path) {
+		parts = append(parts, path[partidx:])
+	}
+	return
+}
