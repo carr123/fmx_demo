@@ -34,9 +34,10 @@ func APIPostProfile(c *fmx.Context) {
 
 func main() {
 	router := fmx.NewServeMux()
-
 	router.GET("/api/profile", APIGetProfile)
 	router.POST("/api/profile", APIPostProfile)
+
+	fmt.Println("version:", fmx.Version)
 
 	err := http.ListenAndServe("127.0.0.1:8080", router)
 	if err != nil {

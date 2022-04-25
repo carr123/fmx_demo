@@ -31,10 +31,20 @@ func BasicAuth() func(c *fmx.Context) {
 //cross origin
 func XOrigin() func(c *fmx.Context) {
 	return func(c *fmx.Context) {
+		if origin := c.Request.Header.Get("Origin"); origin != "" {
+			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+			c.Writer.Header().Set("Access-Control-Allow-Methods", "GET,POST,OPTIONS,HEAD,PUT")
+			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+			c.Writer.Header().Set("Access-Control-Allow-Headers", "Authorization,Content-Type,Accept,Origin,User-Agent,Cache-Control,X-Data-Type,X-Requested-With")
+		}
+
+		//preflight OPTIONS request
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(200)
+			return
+		}
+
 		c.Next()
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET,POST")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 	}
 }
 

@@ -49,13 +49,42 @@ func main() {
 
 	router := fmx.NewServeMux()
 	//router.Use(mwLogger)
-	router.Use(fmx.Logger(false, false))
+	router.Use(fmx.Logger(true, true), XOrigin())
 
+	//router.OPTIONS("/api/profile", APIOption)
 	router.GET("/api/profile", APIGetProfile)
 	router.POST("/api/profile", APIPostProfile)
 
 	err := http.ListenAndServe("127.0.0.1:8080", router)
 	if err != nil {
 		fmt.Println(err)
+	}
+}
+
+func APIOption(c *fmx.Context) {
+	if c.Request.Method == "OPTIONS" {
+		c.AbortWithStatus(200)
+		return
+	}
+	c.Next()
+}
+
+//cross origin
+func XOrigin() func(c *fmx.Context) {
+	return func(c *fmx.Context) {
+		if origin := c.Request.Header.Get("Origin"); origin != "" {
+			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+			c.Writer.Header().Set("Access-Control-Allow-Methods", "GET,POST,OPTIONS,HEAD,PUT")
+			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+			c.Writer.Header().Set("Access-Control-Allow-Headers", "Authorization,Content-Type,Accept,Origin,User-Agent,Cache-Control,X-Data-Type,X-Requested-With")
+		}
+
+		//preflight OPTIONS request
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(200)
+			return
+		}
+
+		c.Next()
 	}
 }
