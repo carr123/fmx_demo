@@ -11,6 +11,9 @@ import (
 //basic GET and POST demo
 
 func APIGetProfile(c *fmx.Context) {
+	//uid := c.Param("uid")
+	//name := c.Param("name")
+
 	//fmx.H is actually a map
 	c.JSON(200, fmx.H{"name": "jack", "age": 20}) //send json
 	//c.String(200, "hello world") //send plain text
@@ -32,10 +35,15 @@ func APIPostProfile(c *fmx.Context) {
 	c.JSON(200, fmx.H{"success": true})
 }
 
+func AccessFile(c *fmx.Context) {
+	//c.File()
+}
+
 func main() {
 	router := fmx.NewServeMux()
-	router.GET("/api/profile", APIGetProfile)
+	router.GET("/api/profile/:uid/:name", APIGetProfile)
 	router.POST("/api/profile", APIPostProfile)
+	router.Any("/cdn/*otherpath", AccessFile)
 
 	fmt.Println("version:", fmx.Version)
 
