@@ -34,21 +34,24 @@ func getAppDir() string {
 
 func HandleWS() func(c *fmx.Context) {
 	return func(c *fmx.Context) {
-		s := websocket.Server{websocket.Config{}, nil, func(ws *websocket.Conn) {
-			defer ws.Close()
-			var msgRead = make([]byte, 1024*1024)
-			var n int
-			var err error
+		s := websocket.Server{websocket.Config{}, nil, func(conn *websocket.Conn) {
+			defer conn.Close()
 
 			fmt.Printf("ws new client:%s\r\n", c.ClientIP())
 
+			conn.MaxPayloadBytes = 32 << 20 // 32MB
+
+			var szNewMsg string
+
 			for {
-				if n, err = ws.Read(msgRead); err != nil || n < 0 {
+
+				if err := websocket.Message.Receive(conn, &szNewMsg); err != nil {
 					break
 				}
-				fmt.Printf("websocket read from %s, data:%s\r\n", c.ClientIP(), string(msgRead[:n]))
 
-				if err := websocket.Message.Send(ws, string(msgRead[:n])); err != nil {
+				fmt.Printf("websocket read from %s, data:%s\r\n", c.ClientIP(), szNewMsg)
+
+				if err := websocket.Message.Send(conn, szNewMsg); err != nil {
 					break
 				}
 			}
